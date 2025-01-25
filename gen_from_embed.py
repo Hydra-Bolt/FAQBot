@@ -41,7 +41,7 @@ Answer the question based only on the following context:
 
 ---
 
-Answer the question based on the above context: {question}
+Answer the question based on the above context: {{question}}
 """
 Q_SYSTEM = """Given a chat history and the latest user question \
 which might reference context in the chat history, formulate a standalone question \
