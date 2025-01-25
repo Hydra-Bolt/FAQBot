@@ -2,7 +2,7 @@ import os
 from flask import Flask, request
 from langchain.schema import HumanMessage, AIMessage
 from dotenv import load_dotenv
-from gen_from_embed import generateFromEmbeddingsWithoutHistory
+from gen_from_embed import generateFromEmbeddings, generateFromEmbeddingsWithoutHistory
 from telegram_utils import (
     sendMessage,
 )
@@ -25,7 +25,10 @@ def generate_response_with_chatgpt(question, chat_id):
     history = chat_history.get(chat_id, [])
     history.append(HumanMessage(content=question))
 
-    response, source = generateFromEmbeddingsWithoutHistory(question)
+    if len(history) > 10:
+        history = history[-10:]
+
+    response, source = generateFromEmbeddings(question, chat_history=history)
     
     history.append(AIMessage(content=response))
     chat_history[chat_id] = history
