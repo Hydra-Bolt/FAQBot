@@ -16,6 +16,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 BASE_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key = OPENAI_API_KEY
+ADMIN_ID = os.getenv("ADMIN_ID")
 
 # Dictionary to maintain chat history
 chat_history = {}
@@ -41,12 +42,13 @@ def handleMessage(message_data):
 
             text: str = message.get("text", "No text found")
 
-            if text.startswith("/"):
-                if text=="/start":
-                    response = "¡Bienvenido al FAQ Bot de Vivir de Ingresos Pasivos! Estoy aquí para ayudarte con cualquier pregunta que tengas sobre estrategias de ingresos pasivos, herramientas de inversión y servicios ofrecidos en nuestro sitio web."
+            if str(chat_id) == ADMIN_ID:
+                response = "Welcome, Admin!"
+            elif text.startswith("/"):
+                if text == "/start":
+                    response = "¡Hola! Soy la IA del Club VIP y estoy aquí para ayudarte con cualquier pregunta que tengas sobre las estrategias y servicios que ofrecemos."
                 else: 
                     response = "Lo siento, no entiendo ese comando."
-                
             else:
                 response = generate_response_with_chatgpt(text, chat_id)
             
@@ -62,9 +64,9 @@ def handleMessage(message_data):
 def home():
     if request.method == "POST":
         message = request.get_json()
+        print(message)
         handleMessage(message)
     return "OK", 200
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=os.getenv("PORT"), debug=True)
