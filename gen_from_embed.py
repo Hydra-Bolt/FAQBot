@@ -1,3 +1,5 @@
+from typing import List
+from langchain.schema import Document
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_history_aware_retriever
@@ -7,7 +9,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from pinecone import Pinecone
 from dotenv import load_dotenv
-from pprint import pprint
+
 import os
 
 load_dotenv()
@@ -32,7 +34,7 @@ Depósito mínimo: 1000 USD
 Beneficio mensual: 5-15% 
 DD Riesgo: 50%
 
-Please note that we do not offer advice or support in the VIP Club. The VIP Club and A10K copytrading strategies are the same (it is a package). 
+Please note that [WE NEVER OFFER] advice or support in the VIP Club. The VIP Club and A10K copytrading strategies are the same (it is a package). 
 Provide clear explanations, guide users to relevant resources on the website, and offer step-by-step assistance when needed. If the question is outside your scope, politely suggest contacting support or joining the VIP Club for expert help. Prioritize clarity, helpfulness, and accessibility.
 
 Answer the question based only on the following context:
@@ -51,17 +53,18 @@ just reformulate it if needed and otherwise return it as is."""
 pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
 index = pc.Index(PINECONE_INDEX)
 
-def generateFromEmbeddings(query_text="", model="gpt-4o-mini", chat_history=[]) -> tuple[str, list[str]]:
-    
-    
-    contextualize_q_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", Q_SYSTEM),
-        MessagesPlaceholder("chat_history"),
-        ("human", "{input}"),
-    ]
-    )
 
+def generateFromEmbeddings(
+    query_text="", model="gpt-4o-mini", chat_history=[]
+) -> tuple[str, list[str]]:
+
+    contextualize_q_prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", Q_SYSTEM),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{input}"),
+        ]
+    )
     # Prepare the DB.
     embedding_function = OpenAIEmbeddings()
     db = PineconeVectorStore(index=index, embedding=embedding_function)
@@ -71,38 +74,37 @@ def generateFromEmbeddings(query_text="", model="gpt-4o-mini", chat_history=[]) 
         agent, db.as_retriever(), contextualize_q_prompt
     )
 
-
-    
     qa_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", PROMPT_TEMPLATE),
-        MessagesPlaceholder("chat_history"),
-        ("human", "{input}"),
-    ]
+        [
+            ("system", PROMPT_TEMPLATE),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{input}"),
+        ]
     )
-    question_answer_chain = create_stuff_documents_chain(agent, qa_prompt)
 
+    question_answer_chain = create_stuff_documents_chain(agent, qa_prompt)
     rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
     response = rag_chain.invoke({"input": query_text, "chat_history": chat_history})
 
     sources = response["context"]
-
-    pprint(sources)
     response_text = response["answer"]
     return (response_text, sources)
 
-def generateFromEmbeddingsWithoutHistory(query_text="", model="gpt-4o-mini") -> tuple[str, list[str]]:
+
+def generateFromEmbeddingsWithoutHistory(
+    query_text="", model="gpt-4o-mini"
+) -> tuple[str, list[str]]:
     # Prepare the DB.
     embedding_function = OpenAIEmbeddings()
     db = PineconeVectorStore(index=index, embedding=embedding_function)
     agent = ChatOpenAI(api_key=os.environ["OPENAI_API_KEY"], model=model)
 
     qa_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", PROMPT_TEMPLATE),
-        ("human", "{input}"),
-    ]
+        [
+            ("system", PROMPT_TEMPLATE),
+            ("human", "{input}"),
+        ]
     )
     question_answer_chain = create_stuff_documents_chain(agent, qa_prompt)
 
@@ -112,9 +114,26 @@ def generateFromEmbeddingsWithoutHistory(query_text="", model="gpt-4o-mini") -> 
 
     sources = response["context"]
 
-    pprint(sources)
     response_text = response["answer"]
     return (response_text, sources)
 
 
+def generateAnswerFromSources(
+    query_text: str, sources: List[Document], chat_history: list[str], model="gpt-4o-mini"
+) -> str:
+    agent = ChatOpenAI(api_key=os.environ["OPENAI_API_KEY"], model=model)
 
+    qa_prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", PROMPT_TEMPLATE),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{input}"),
+        ]
+    )
+    question_answer_chain = create_stuff_documents_chain(agent, qa_prompt)
+
+    response = question_answer_chain.invoke(
+        {"input": query_text, "chat_history": chat_history, "context": sources}
+    )
+
+    return response

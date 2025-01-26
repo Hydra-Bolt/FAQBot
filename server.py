@@ -1,12 +1,16 @@
 import os
 from flask import Flask, request
-from langchain.schema import HumanMessage, AIMessage
+from langchain.schema import HumanMessage, AIMessage, Document
 from dotenv import load_dotenv
-from gen_from_embed import generateFromEmbeddings, generateFromEmbeddingsWithoutHistory
+from database import getFromSupabase
+from gen_from_embed import generateAnswerFromSources
 from telegram_utils import (
     sendMessage,
 )
 import openai
+from faq_embeddings import getTopK
+import json
+import traceback
 
 app = Flask(__name__)
 
@@ -21,15 +25,23 @@ ADMIN_ID = os.getenv("ADMIN_ID")
 # Dictionary to maintain chat history
 chat_history = {}
 
-def generate_response_with_chatgpt(question, chat_id):
+def generateResponse(question, chat_id):
     history = chat_history.get(chat_id, [])
     history.append(HumanMessage(content=question))
 
     if len(history) > 10:
         history = history[-10:]
 
-    response, source = generateFromEmbeddings(question, chat_history=history)
-    
+    sources = getTopK(question)
+    print(json.dumps(sources, indent=4, default=str))
+    if sources and sources[0][1] > 0.93:
+        question = sources[0][0].page_content
+        response = getFromSupabase(question)
+    else:
+        print("No Match Found")
+        sources = [Document(page_content=getFromSupabase(source[0].page_content)) for source in sources]
+        response = generateAnswerFromSources(question, sources, history)
+
     history.append(AIMessage(content=response))
     chat_history[chat_id] = history
     
@@ -39,10 +51,7 @@ def handleMessage(message_data):
     try:
         if "message" in message_data:
             message: dict = message_data["message"]
-            chat_id = message["chat"]["id"]
-            message_id = message["message_id"]
-            username = message["from"]["first_name"]
-
+            chat_id = message["from"]["id"]
             text: str = message.get("text", "No text found")
 
             if str(chat_id) == ADMIN_ID:
@@ -53,14 +62,16 @@ def handleMessage(message_data):
                 else: 
                     response = "Lo siento, no entiendo ese comando."
             else:
-                response = generate_response_with_chatgpt(text, chat_id)
+                response = generateResponse(text, chat_id)
             
             sendMessage(response, chat_id)
     except KeyError as e:
         print(f"KeyError: {e}")
+        traceback.print_exc()
         sendMessage("Lo siento, ha ocurrido un error procesando tu mensaje.", chat_id)
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print("An error occurred:")
+        traceback.print_exc()
         sendMessage("Lo siento, ha ocurrido un error inesperado.", chat_id)
 
 @app.route("/", methods=["GET", "POST"])
