@@ -1,8 +1,6 @@
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
 from pinecone import Pinecone
-
-from langchain.schema import Document
 import os
 
 pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
