@@ -29,9 +29,7 @@ def getFromSupabase(question=None):
     data = response.json()
     
     if question:
-        return {
-            "answer": data[0]['answer']['answer']
-        } if data else None
+        return data[0]['answer']['answer'] if data else None
     else:
         return {
             item['question']: {
