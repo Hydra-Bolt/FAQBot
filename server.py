@@ -1,16 +1,21 @@
 import os
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, redirect, url_for
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from langchain.schema import HumanMessage, AIMessage, Document
 from dotenv import load_dotenv
-from utils.database import getFromSupabase, updateSupabase, insertToSupabase
+from utils.database import deleteFromSupabase, getFromSupabase, updateSupabase, insertToSupabase
 from utils.gen_from_embed import generateAnswerFromSources
 from utils.telegram_utils import sendMessage
 from utils.faq_embeddings import getTopK
 import json
 import traceback
 
-
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
 load_dotenv()
 # Constants
@@ -21,6 +26,32 @@ ADMIN_ID = os.getenv("ADMIN_ID")
 # Dictionary to maintain chat history
 chat_history = {}
 
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        if username == os.getenv("ADMIN_USERNAME") and password == os.getenv("ADMIN_PASSWORD"):
+            user = User(id=username)
+            login_user(user)
+            return redirect(url_for("dashboard"))
+        else:
+            return "Invalid credentials", 401
+    return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
 
 def generateResponse(question, chat_id):
     history = chat_history.get(chat_id, [])
@@ -46,7 +77,6 @@ def generateResponse(question, chat_id):
     chat_history[chat_id] = history
 
     return response
-
 
 def handleMessage(message_data):
     try:
@@ -75,8 +105,8 @@ def handleMessage(message_data):
         traceback.print_exc()
         sendMessage("Lo siento, ha ocurrido un error inesperado.", chat_id)
 
-
 @app.route("/dashboard")
+@login_required
 def dashboard():
     # Fetch messages from Supabase
     messages = getFromSupabase()  # Adjust this function to fetch all messages
@@ -97,8 +127,30 @@ def dashboard():
 
     return render_template("dashboard.html", messages=sorted_grouped_messages)
 
+@app.route("/delete", methods=["POST"])
+@login_required
+def delete():
+    try:
+        data = request.get_json()
+        id = data.get("id")
+
+        if not id:
+            return jsonify({"error": "Invalid input"}), 400
+
+        # Delete the entry from the database
+        delete_status = deleteFromSupabase(id)  # Adjust this function to delete the entry
+
+        if delete_status:
+            return jsonify({"message": "Deletion successful", "success": True}), 200
+        else:
+            return jsonify({"error": "Deletion failed", "success": False}), 500
+    except Exception as e:
+        print("An error occurred:", e)
+        traceback.print_exc()
+        return jsonify({"error": "An error occurred", "success": False}), 500
 
 @app.route("/update", methods=["POST"])
+@login_required
 def update():
     try:
         data = request.get_json()
@@ -106,7 +158,7 @@ def update():
         answer = data.get("answer")
 
         if not id or not answer:
-            return jsonify({"error": "Invalid input"}), 400
+            return jsonify({"error": "Invalid input", "success": False}), 400
 
         # Update the database with the new question and answer
         update_status = updateSupabase(
@@ -114,16 +166,16 @@ def update():
         )  # Adjust this function to update the database
 
         if update_status:
-            return jsonify({"message": "Update successful"}), 200
+            return jsonify({"message": "Update successful", "success": True}), 200
         else:
-            return jsonify({"error": "Update failed"}), 500
+            return jsonify({"error": "Update failed", "success": False}), 500
     except Exception as e:
         print("An error occurred:", e)
         traceback.print_exc()
-        return jsonify({"error": "An error occurred"}), 500
-
+        return jsonify({"error": "An error occurred", "success": False}), 500
 
 @app.route("/add", methods=["POST"])
+@login_required
 def add():
     try:
         data = request.get_json()
@@ -132,8 +184,7 @@ def add():
         print(questions, answer)
 
         if not questions or not answer:
-            return jsonify({"error": "Invalid input"}), 400
-
+            return jsonify({"error": "Invalid input", "success": False}), 400
 
         add_status = insertToSupabase(
             questions, answer
@@ -142,12 +193,11 @@ def add():
         if add_status:
             return jsonify({"success": True, "message": "Addition successful"}), 200
         else:
-            return jsonify({"error": "Addition failed"}), 500
+            return jsonify({"error": "Addition failed", "success": False}), 500
     except Exception as e:
         print("An error occurred:", e)
         traceback.print_exc()
-        return jsonify({"error": "An error occurred"}), 500
-
+        return jsonify({"error": "An error occurred", "success": False}), 500
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -156,7 +206,6 @@ def home():
         print(message)
         handleMessage(message)
     return "OK", 200
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=os.getenv("PORT"), debug=True)

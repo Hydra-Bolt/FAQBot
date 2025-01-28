@@ -5,23 +5,31 @@ import os
 
 pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
 
-# Connect to your index
-index_name = "faq-bot"
-index = pc.Index(index_name)
+INDEX = "faq-bot"
+index = pc.Index(INDEX)
+embedding_function = OpenAIEmbeddings()
 
+db = PineconeVectorStore(index=index, embedding=embedding_function)
 
 def getTopK(query_text, k=3):
-    embedding_function = OpenAIEmbeddings()
-    db = PineconeVectorStore(index=index, embedding=embedding_function)
-
     responses = db.similarity_search_with_relevance_scores(query_text, k=k)
     return responses
 
-def insertFAQ(text):
-    embedding_function = OpenAIEmbeddings()
-    db = PineconeVectorStore(index=index, embedding=embedding_function)
+def insertFAQ(ids, texts):
+    try:
+        resp = db.add_texts(texts, ids=ids)
+        if resp:
+            print(f"Added {texts} to the index")
+            return True
+    except Exception as e:
+        print(f"Failed to add texts: {e}")
+    return False
 
-    ids = db.add_texts([text])
-
-    if ids:
-        print(f"Added {text} to the index")
+def deleteFAQ(id):
+    try:
+        db.delete([id])
+        print(f"Deleted {id} from the index")
+        return True
+    except Exception as e:
+        print(f"Failed to delete id {id}: {e}")
+    return False
