@@ -30,7 +30,6 @@ def getFromSupabase(question=None):
     
     if question:
         return {
-            "id": data[0]['id'],
             "answer": data[0]['answer']['answer']
         } if data else None
     else:
