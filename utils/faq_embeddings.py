@@ -16,3 +16,12 @@ def getTopK(query_text, k=3):
 
     responses = db.similarity_search_with_relevance_scores(query_text, k=k)
     return responses
+
+def insertFAQ(text):
+    embedding_function = OpenAIEmbeddings()
+    db = PineconeVectorStore(index=index, embedding=embedding_function)
+
+    ids = db.add_texts([text])
+
+    if ids:
+        print(f"Added {text} to the index")
