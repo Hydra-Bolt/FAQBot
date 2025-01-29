@@ -17,11 +17,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-load_dotenv()
+load_dotenv(".env")
 # Constants
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BASE_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
 ADMIN_ID = os.getenv("ADMIN_ID")
+
 
 # Dictionary to maintain chat history
 chat_history = {}
@@ -60,18 +61,18 @@ def generateResponse(question, chat_id):
     if len(history) > 10:
         history = history[-10:]
 
-    sources = getTopK(question)
+    sources = getTopK(question, 5)
     print(json.dumps(sources, indent=4, default=str))
     if sources and sources[0][1] > 0.93:
         question = sources[0][0].page_content
         response = getFromSupabase(question)
     else:
         print("No Match Found")
-        sources = [
-            Document(page_content=getFromSupabase(source[0].page_content))
-            for source in sources
-        ]
-        response = generateAnswerFromSources(question, sources, history)
+        unique_sources = {source[0].page_content: source for source in sources}.values()
+        unique_answers = {getFromSupabase(source[0].page_content): source for source in unique_sources}.keys()
+        answers = [Document(page_content=answer) for answer in unique_answers]
+        print(json.dumps(answers, indent=4, default=str))
+        response = generateAnswerFromSources(question, answers, history)
 
     history.append(AIMessage(content=response))
     chat_history[chat_id] = history
