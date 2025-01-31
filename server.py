@@ -77,7 +77,7 @@ def generateResponse(question, chat_id):
     history.append(AIMessage(content=response))
     chat_history[chat_id] = history
 
-    return response
+    return response.replace("*", "")
 
 def handleMessage(message_data):
     try:

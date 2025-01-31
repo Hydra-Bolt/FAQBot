@@ -30,7 +30,7 @@ DD Riesgo: 14%
 
 A10K INTERÉS COMPUESTO  
 Estrategia manual multidivisa en Forex  
-Depósito mínimo: 1000 USD  
+Depósito mínimo: 1500 USD  
 Beneficio mensual: 5-15% 
 DD Riesgo: 50%
 
