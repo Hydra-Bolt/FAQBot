@@ -39,24 +39,32 @@ def getFromSupabase(question=None):
             } for item in data
         }
 
-def updateSupabase(answer_id, new_answer):
+def updateSupabase(id, new_val, table):
     headers = {
         "apikey": key,
         "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
     }
     
-    data = {
-        "answer": new_answer
-    }
+    data = {}
+    if table == "Answers":
+        data["answer"] = new_val
+    elif table == "Questions":
+        data["question"] = new_val
     
     query = {
-        "id": f"eq.{answer_id}"
+        "id": f"eq.{id}"
     }
     
-    response = requests.patch(f"{url}/rest/v1/Answers", headers=headers, params=query, json=data)
+    response = requests.patch(f"{url}/rest/v1/{table}", headers=headers, params=query, json=data)
     
-    return response.status_code == 204  # 204 No Content indicates success
+    if response.status_code == 200 and table == "Questions":
+        # Delete old FAQ entry and insert new one
+        if not insertFAQ([str(id)], [new_val]):
+            return False
+    
+    return response.status_code == 200  # 200 OK indicates success when using return=representation
 
 def insertToSupabase(questions, answer):
     headers = {
@@ -89,8 +97,29 @@ def insertToSupabase(questions, answer):
     
     return True
 
+def insertQuestionToSupabase(id, new_questions):
+    headers = {
+        "apikey": key,
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+    }
+    
+    # Insert the questions
+    question_data = [{"question": question, "answer": id} for question in new_questions]
+    question_response = requests.post(f"{url}/rest/v1/Questions", headers=headers, json=question_data)
 
-def deleteFromSupabase(id):
+    if question_response.status_code != 201:
+        return False
+    
+    question_ids = [str(item['id']) for item in question_response.json()]
+    if not insertFAQ(question_ids, new_questions):
+        print("Failed to insert FAQ entries")
+        return False
+    
+    return True
+
+def deleteFromSupabase(id, table):
     headers = {
         "apikey": key,
         "Authorization": f"Bearer {key}",
@@ -98,25 +127,40 @@ def deleteFromSupabase(id):
         "Prefer": "return=representation"
     }
 
-    # Delete questions associated with the answer
-    question_query = {"answer": f"eq.{id}"}
-    question_response = requests.delete(f"{url}/rest/v1/Questions", headers=headers, params=question_query)
-    
-    if question_response.status_code != 200:
-        print("Failed to delete questions")
-        return False
+    if table == "Answers":
+        # Delete questions associated with the answer
+        question_query = {"answer": f"eq.{id}"}
+        question_response = requests.delete(f"{url}/rest/v1/Questions", headers=headers, params=question_query)
+        
+        if question_response.status_code != 200:
+            print("Failed to delete questions")
+            return False
 
-    question_ids = [str(item['id']) for item in question_response.json()]
-    if not deleteFAQ(question_ids):
-        print("Failed to delete FAQ entries")
-        return False
+        question_ids = [str(item['id']) for item in question_response.json()]
+        if not deleteFAQ(question_ids):
+            print("Failed to delete FAQ entries")
+            return False
 
-    # Delete the answer
-    answer_query = {"id": f"eq.{id}"}
-    answer_response = requests.delete(f"{url}/rest/v1/Answers", headers=headers, params=answer_query)
-    
-    if answer_response.status_code != 200:
-        print("Failed to delete answers")
-        return False
+        # Delete the answer
+        answer_query = {"id": f"eq.{id}"}
+        answer_response = requests.delete(f"{url}/rest/v1/Answers", headers=headers, params=answer_query)
+        
+        if answer_response.status_code != 200:
+            print("Failed to delete answers")
+            return False
+
+    elif table == "Questions":
+        # Delete the question by id
+        question_query = {"id": f"eq.{id}"}
+        question_response = requests.delete(f"{url}/rest/v1/Questions", headers=headers, params=question_query)
+        
+        if question_response.status_code != 200:
+            print("Failed to delete question")
+            return False
+            
+        # Delete the FAQ entry
+        if not deleteFAQ([str(id)]):
+            print("Failed to delete FAQ entry")
+            return False
 
     return True

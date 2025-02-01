@@ -1,314 +1,563 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            font-family: 'Raleway', sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            position: relative;
-        }
-        h1 {
-            text-align: center;
-            color: #ffffff;
-        }
-        table {
-            width: 80%;
-            border-collapse: collapse;
-            margin: 20px auto;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            background-color: #1e1e1e;
-        }
-        th, td {
-            padding: 12px 15px;
-            border: 1px solid #333;
-            vertical-align: top;
-        }
-        th {
-            background-color: #333;
-            font-weight: bold;
-            text-align: left;
-            color: #ffffff;
-        }
-        tr:nth-child(even) {
-            background-color: #2c2c2c;
-        }
-        tr:hover {
-            background-color: #3a3a3a;
-        }
-        td {
-            overflow: auto; /* Enable overflow */
-        }
-        td div.answer {
-            max-height: 25vh; /* Fixed height */
-            overflow: auto; /* Enable overflow */
-            padding: 5px 0;
-        }
-        td div.edit-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 10px;
-        }
-        td:first-child {
-            width: 10%;
-        }
-        td:nth-child(2) {
-            width: 40%;
-        }
-        td:nth-child(3) {
-            width: 50%;
-        }
-        textarea {
-            width: 100%;
-            height: 80px;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #333;
-            border-radius: 4px;
-            font-size: 14px;
-            resize: vertical;
-            background-color: #2c2c2c;
-            color: #e0e0e0;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 14px;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .edit-button {
-            background-color: #28a745;
-        }
-        .edit-button:hover {
-            background-color: #218838;
-        }
-        .delete-button {
-            background-color: #dc3545;
-            margin-left: 10px;
-        }
-        .delete-button:hover {
-            background-color: #c82333;
-        }
-        .floating-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            font-size: 16px;
-            background-color: #007bff;
-            border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-        .floating-button:hover {
-            background-color: #0056b3;
-        }
-        .submit-new-button, .cancel-new-button {
-            margin: 0 10px;
-        }
-        .submit-new-button {
-            background-color: #28a745;
-        }
-        .submit-new-button:hover {
-            background-color: #218838;
-        }
-        .cancel-new-button {
-            background-color: #dc3545;
-        }
-        .cancel-new-button:hover {
-            background-color: #c82333;
-        }
-        
+      .question-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      .question-edit-button,
+      .question-delete-button {
+        background: none;
+        border: none;
+        color: #28a745;
+        cursor: pointer;
+        padding: 2px;
+        margin-right: 5px;
+      }
+      .question-edit-button:hover,
+      .question-delete-button:hover {
+        color: #218838;
+      }
+      .question-delete-button {
+        color: #dc3545;
+      }
+      .question-delete-button:hover {
+        color: #c82333;
+      }
+
+      body {
+        font-family: "Raleway", sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        position: relative;
+      }
+      h1 {
+        text-align: center;
+        color: #ffffff;
+      }
+      table {
+        width: 80%;
+        border-collapse: collapse;
+        margin: 20px auto;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: #1e1e1e;
+      }
+      th,
+      td {
+        padding: 12px 15px;
+        border: 1px solid #333;
+        vertical-align: top;
+      }
+      th {
+        background-color: #333;
+        font-weight: bold;
+        text-align: left;
+        color: #ffffff;
+      }
+      tr:nth-child(even) {
+        background-color: #2c2c2c;
+      }
+      tr:hover {
+        background-color: #3a3a3a;
+      }
+      td {
+        overflow: auto; /* Enable overflow */
+      }
+      td div.answer {
+        max-height: 25vh; /* Fixed height */
+        overflow: auto; /* Enable overflow */
+        padding: 5px 0;
+      }
+      td div.edit-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+      }
+      td:first-child {
+        width: 10%;
+      }
+      td:nth-child(2) {
+        width: 40%;
+      }
+      td:nth-child(3) {
+        width: 50%;
+      }
+      textarea {
+        width: 100%;
+        height: 80px;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 1px solid #333;
+        border-radius: 4px;
+        font-size: 14px;
+        resize: vertical;
+        background-color: #2c2c2c;
+        color: #e0e0e0;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 14px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .edit-button {
+        background-color: #28a745;
+      }
+      .edit-button:hover {
+        background-color: #218838;
+      }
+      .delete-button {
+        background-color: #dc3545;
+        margin-left: 10px;
+      }
+      .delete-button:hover {
+        background-color: #c82333;
+      }
+      .floating-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        font-size: 16px;
+        background-color: #007bff;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+      .floating-button:hover {
+        background-color: #0056b3;
+      }
+      .submit-new-button,
+      .cancel-new-button {
+        margin: 0 10px;
+      }
+      .submit-new-button {
+        background-color: #28a745;
+      }
+      .submit-new-button:hover {
+        background-color: #218838;
+      }
+      .cancel-new-button {
+        background-color: #dc3545;
+      }
+      .cancel-new-button:hover {
+        background-color: #c82333;
+      }
+      .add-more-questions-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-top: 10px;
+      }
+      .add-more-questions-button:hover {
+        background-color: #0056b3;
+      }
     </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('add-button').addEventListener('click', function() {
-                let newRow = document.createElement('tr');
-        
-                newRow.innerHTML = `
-                    <td>Auto-generated</td>
-                    <td><textarea placeholder="New Questions (separate by commas)"></textarea></td>
-                    <td>
-                        <div class="answer"><textarea placeholder="New Answer"></textarea></div>
-                        <div class="edit-container">
-                            <button class="submit-new-button">Submit</button>
-                            <button class="cancel-new-button">Cancel</button>
-                        </div>
-                    </td>
+      function editQuestion(button) {
+        let questionDiv = button.previousElementSibling;
+        let currentText = questionDiv.innerText;
+        let questionDataId = questionDiv.getAttribute("data-id");
+        let input = document.createElement("input");
+        input.value = currentText;
+        input.style.width = "90%";
+        input.style.backgroundColor = "#2c2c2c";
+        input.style.color = "#e0e0e0";
+        input.style.border = "1px solid #333";
+        input.style.padding = "3px";
+
+        questionDiv.replaceWith(input);
+        button.innerHTML = '<i class="fas fa-check"></i>';
+
+        button.onclick = function () {
+          console.log("button clicked");
+          let newQuestion = input.value;
+
+          fetch("/update", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({
+              id: questionDataId,
+              new: newQuestion,
+              table: "Questions",
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Question updated successfully: " + data.message);
+                questionDiv.innerText = newQuestion;
+                input.replaceWith(questionDiv);
+                button.innerHTML = '<i class="fas fa-edit"></i>';
+                button.onclick = function () {
+                  editQuestion(button);
+                };
+              } else {
+                alert("Failed to update question: " + data.message);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("An error occurred: " + error.message);
+            });
+        };
+      }
+      function deleteQuestion(button) {
+        let questionDiv = button.previousElementSibling.previousElementSibling;
+        let questionDataId = questionDiv.getAttribute("data-id");
+
+        if (confirm("Are you sure you want to delete this question?")) {
+          fetch("/delete", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({
+              id: questionDataId,
+              table: "Questions",
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Question deleted successfully: " + data.message);
+                questionDiv.parentElement.remove();
+              } else {
+                alert("Failed to delete question: " + data.message);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("An error occurred: " + error.message);
+            });
+        }
+      }
+      function addMoreQuestions(button) {
+        let questionContainer = button.closest("td");
+        let newQuestionDiv = document.createElement("div");
+        newQuestionDiv.classList.add("question-container");
+
+        newQuestionDiv.innerHTML = `
+            <div class="question-text" data-id="new">
+            <input type="text" placeholder="New Questions (separate by commas)" style="width: 90%; background-color: #2c2c2c; color: #e0e0e0; border: 1px solid #333; padding: 10px; font-size: 16px;">
+            </div>
+            <button class="question-submit-button" onclick="submitNewQuestions(this)" style="margin-right: 10px; padding: 10px 20px; font-size: 16px;">
+            <i class="fas fa-check"></i>
+            </button>
+            <button class="question-cancel-button" onclick="cancelNewQuestions(this)" style="padding: 10px 20px; font-size: 16px;">
+            <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        questionContainer.appendChild(newQuestionDiv);
+        button.style.display = "none"; // Hide the add more questions button
+      }
+
+      function submitNewQuestions(button) {
+        let questionDiv = button.previousElementSibling;
+        let newQuestions = questionDiv
+          .querySelector("input")
+          .value.trim()
+          .split(",");
+        let id = button
+          .closest("tr")
+          .querySelector("td:first-child")
+          .innerText.trim();
+
+        fetch("/add_questions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: JSON.stringify({
+            id: id,
+            questions: newQuestions,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert("Questions added successfully: " + data.message);
+              location.reload(); // Reload the page to see the new questions
+            } else {
+              alert("Failed to add questions: " + data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred: " + error.message);
+          });
+      }
+
+      function cancelNewQuestions(button) {
+        let questionContainer = button.closest("td");
+        button.closest(".question-container").remove();
+        questionContainer.querySelector(
+          ".add-more-questions-button"
+        ).style.display = "inline-block"; // Show the add more questions button again
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .querySelectorAll(".add-more-questions-button")
+          .forEach(function (button) {
+            button.addEventListener("click", function () {
+              addMoreQuestions(button);
+            });
+          });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("add-button")
+          .addEventListener("click", function () {
+            let newRow = document.createElement("tr");
+
+            newRow.innerHTML = `
+                                <td>Auto-generated</td>
+                                <td><textarea placeholder="New Questions (separate by commas)"></textarea></td>
+                                <td>
+                                                <div class="answer"><textarea placeholder="New Answer"></textarea></div>
+                                                <div class="edit-container">
+                                                                <button class="submit-new-button">Submit</button>
+                                                                <button class="cancel-new-button">Cancel</button>
+                                                </div>
+                                </td>
                 `;
-        
-                document.querySelector('table tbody').appendChild(newRow);
-        
-                newRow.querySelector('.submit-new-button').addEventListener('click', function() {
-                    let questions = newRow.querySelector('td:nth-child(2) textarea').value.trim().split(',');
-                    let answer = newRow.querySelector('td:nth-child(3) textarea').value.trim();
-        
-                    fetch('/add', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        },
-                        body: JSON.stringify({
-                            questions: questions,
-                            answer: answer
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('FAQ added successfully: ' + data.message);
-                            location.reload(); // Reload the page to see the new FAQ
-                        } else {
-                            alert('Failed to add FAQ: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred: ' + error.message);
-                    });
-                });
-    
-                newRow.querySelector('.cancel-new-button').addEventListener('click', function() {
-                    newRow.remove();
-                });
-            });
-            document.querySelectorAll('.edit-button').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    let td = button.closest('td');
-                    let answerDiv = td.querySelector('div.answer');
-                    let currentText = answerDiv.innerHTML.replace(/<br\s*\/?>/gi, '\n');
-                    let textarea = document.createElement('textarea');
-                    textarea.value = currentText;
-                    answerDiv.innerHTML = '';
-                    answerDiv.appendChild(textarea);
-                    textarea.focus();
 
-                    button.style.display = 'none'; // Hide the edit button
+            document.querySelector("table tbody").appendChild(newRow);
 
-                    let submitButton = document.createElement('button');
-                    submitButton.innerText = 'Submit';
-                    td.querySelector('div.edit-container').appendChild(submitButton);
+            newRow
+              .querySelector(".submit-new-button")
+              .addEventListener("click", function () {
+                let questions = newRow
+                  .querySelector("td:nth-child(2) textarea")
+                  .value.trim()
+                  .split(",");
+                let answer = newRow
+                  .querySelector("td:nth-child(3) textarea")
+                  .value.trim();
 
-                    submitButton.addEventListener('click', function() {
-                        let newText = textarea.value.replace(/\n/g, '<br>');
-                        answerDiv.innerHTML = newText;
-
-                        // Send the updated answer to the backend
-                        fetch('/update', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': '{{ csrf_token }}'
-                            },
-                            body: JSON.stringify({
-                                id: td.parentElement.firstElementChild.innerText.trim(),
-                                answer: newText.replace(/<br\s*\/?>/gi, '\n')
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Answer updated successfully: ' + data.message);
-                            } else {
-                                alert('Failed to update answer: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred: ' + error.message);
-                        });
-
-                        submitButton.remove(); // Remove the submit button
-                        button.style.display = 'inline-block'; // Show the edit button again
-                    });
-                });
-            });
-            document.querySelectorAll('.delete-button').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    let row = button.closest('tr');
-                    let id = row.querySelector('td:first-child').innerText.trim();
-
-                    if (confirm('Are you sure you want to delete this FAQ?')) {
-                        fetch('/delete', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': '{{ csrf_token }}'
-                            },
-                            body: JSON.stringify({
-                                id: id
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('FAQ deleted successfully: ' + data.message);
-                                row.remove(); // Remove the row from the table
-                                location.reload(); // Reload the page to see the new FAQ
-                            } else {
-                                alert('Failed to delete FAQ: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred: ' + error.message);
-                        });
+                fetch("/add", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                  },
+                  body: JSON.stringify({
+                    questions: questions,
+                    answer: answer,
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (data.success) {
+                      alert("FAQ added successfully: " + data.message);
+                      location.reload(); // Reload the page to see the new FAQ
+                    } else {
+                      alert("Failed to add FAQ: " + data.message);
                     }
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                    alert("An error occurred: " + error.message);
+                  });
+              });
+
+            newRow
+              .querySelector(".cancel-new-button")
+              .addEventListener("click", function () {
+                newRow.remove();
+              });
+          });
+        document.querySelectorAll(".edit-button").forEach(function (button) {
+          button.addEventListener("click", function () {
+            let td = button.closest("td");
+            let answerDiv = td.querySelector("div.answer");
+            let currentText = answerDiv.innerHTML.replace(/<br\s*\/?>/gi, "\n");
+            let textarea = document.createElement("textarea");
+            textarea.value = currentText;
+            answerDiv.innerHTML = "";
+            answerDiv.appendChild(textarea);
+            textarea.focus();
+
+            button.style.display = "none"; // Hide the edit button
+
+            let submitButton = document.createElement("button");
+            submitButton.innerText = "Submit";
+            td.querySelector("div.edit-container").appendChild(submitButton);
+
+            submitButton.addEventListener("click", function () {
+              let newText = textarea.value.replace(/\n/g, "<br>");
+              answerDiv.innerHTML = newText;
+
+              // Send the updated answer to the backend
+              fetch("/update", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify({
+                  id: td.parentElement.firstElementChild.innerText.trim(),
+                  new: newText.replace(/<br\s*\/?>/gi, "\n"),
+                  table: "Answers",
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    alert("Answer updated successfully: " + data.message);
+                  } else {
+                    alert("Failed to update answer: " + data.message);
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  alert("An error occurred: " + error.message);
                 });
+
+              submitButton.remove(); // Remove the submit button
+              button.style.display = "inline-block"; // Show the edit button again
             });
+          });
         });
+        document.querySelectorAll(".delete-button").forEach(function (button) {
+          button.addEventListener("click", function () {
+            let row = button.closest("tr");
+            let id = row.querySelector("td:first-child").innerText.trim();
+
+            if (confirm("Are you sure you want to delete this FAQ?")) {
+              fetch("/delete", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify({
+                  id: id,
+                  table: "Answers",
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    alert("FAQ deleted successfully: " + data.message);
+                    row.remove(); // Remove the row from the table
+                    location.reload(); // Reload the page to see the new FAQ
+                  } else {
+                    alert("Failed to delete FAQ: " + data.message);
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  alert("An error occurred: " + error.message);
+                });
+            }
+          });
+        });
+        document
+          .getElementById("download-csv-button")
+          .addEventListener("click", function () {
+            console.log("Download CSV button clicked");
+            window.location.href = "/download";
+          });
+      });
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <div>
-        <h1>FAQ Index</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Questions</th>
-                    <th>Answer</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for answer, questions in messages.items() %}
-                <tr>
-                    <td>
-                        <div>{{ questions[0] }}</div>
-                    </td>
-                    <td>
-                        {% for question in questions[1] %}
-                        <div>{{ question }}</div>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <div class="answer">{{  answer|replace('\n', '<br>')|safe  }}</div>
-                        <div class="edit-container">
-                            <button class="edit-button">Edit</button>
-                            <button class="delete-button">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+      <h1>FAQ Index</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Questions</th>
+            <th>Answer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for answer, questions in messages.items() %}
+          <tr>
+            <td>
+              <div>{{ questions[0] }}</div>
+            </td>
+            <td>
+              {% for question in questions[1] %}
+              <div class="question-container">
+                <div class="question-text" data-id="{{ question[0] }}">
+                  {{ question[1] }}
+                </div>
+                <button
+                  class="question-edit-button"
+                  onclick="editQuestion(this)"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="question-delete-button"
+                  onclick="deleteQuestion(this)"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              {% endfor %}
+              <button class="add-more-questions-button">
+                +
+              </button>
+            </td>
+            <td>
+              <div class="answer">
+                {{ answer|replace('\n', '<br />')|safe }}
+              </div>
+              <div class="edit-container">
+                <button class="edit-button">Edit</button>
+                <button class="delete-button">Delete</button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
     <button id="add-button" class="floating-button">+</button>
-</body>
+    <button
+      id="download-csv-button"
+      class="floating-button"
+      style="bottom: 80px"
+    >
+      Download CSV
+    </button>
+  </body>
 </html>
