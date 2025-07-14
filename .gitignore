@@ -1,4 +1,34 @@
-*.ipynb
+# Python files
 *.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+
+# Environment files
 .env
+
+# Development files
+*.ipynb
+.vscode/
+.idea/
+
+# Runtime files
+logs/
+*.log
+
+# Dependencies
+node_modules/
+venv/
+env/
+
+# Database
+*.db
+*.sqlite3
+
+# JSON files (keeping faq.json but ignoring others that might contain sensitive data)
 *.json
+!faq.json
